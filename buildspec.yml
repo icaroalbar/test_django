@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 050752605482.dkr.ecr.us-east-1.amazonaws.com
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -t i2plan-frontend .
+      - docker tag i2plan-frontend:latest 050752605482.dkr.ecr.us-east-1.amazonaws.com/i2plan-frontend:latest
+  post_build:
+    commands:
+      - echo Pushing the Docker images...
+      - docker push 050752605482.dkr.ecr.us-east-1.amazonaws.com/i2plan-frontend:latest
+      - echo Writing image definitions file...
+      - printf '[{"name":"web","imageUri":"050752605482.dkr.ecr.us-east-1.amazonaws.com/i2plan-frontend:%s"}]' $IMAGE_TAG > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
