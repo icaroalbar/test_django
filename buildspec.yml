@@ -10,11 +10,13 @@ phases:
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t i2plan-frontend .
-      - docker tag i2plan-frontend:latest 050752605482.dkr.ecr.us-east-1.amazonaws.com/i2plan-frontend:latest
+      - docker build -t i2plan-frontend:$IMAGE_TAG .
+      - docker tag i2plan-frontend:$IMAGE_TAG 050752605482.dkr.ecr.us-east-1.amazonaws.com/i2plan-frontend:$IMAGE_TAG
+      - docker tag i2plan-frontend:$IMAGE_TAG 050752605482.dkr.ecr.us-east-1.amazonaws.com/i2plan-frontend:latest
   post_build:
     commands:
       - echo Pushing the Docker images...
+      - docker push 050752605482.dkr.ecr.us-east-1.amazonaws.com/i2plan-frontend:$IMAGE_TAG
       - docker push 050752605482.dkr.ecr.us-east-1.amazonaws.com/i2plan-frontend:latest
       - echo Writing image definitions file...
       - printf '[{"name":"web","imageUri":"050752605482.dkr.ecr.us-east-1.amazonaws.com/i2plan-frontend:%s"}]' $IMAGE_TAG > imagedefinitions.json
